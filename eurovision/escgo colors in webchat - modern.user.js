@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         escgo! colors in webchat - modern
-// @version      0.1
+// @version      0.2
 // @description  Adds an option to make text bold/italic?/underlined/colorful in the escgo! chat
 // @author       Andrei Felix
-// @match        http://www.escgo.com/wp-content/uploads/euwebirc-master/static/qui.html?colors=true
-// @match        http://www.escgo.com/wp-content/uploads/euwebirc-master2/static/qui.html?colors=true
+// @match        http://www.escgo.com/wp-content/uploads/euwebirc-master/static/qui.html
+// @match        http://www.escgo.com/wp-content/uploads/euwebirc-master2/static/qui.html
 // @icon         http://www.escgo.com/wp-content/uploads/2017/04/cropped-escgologolarge-32x32.png
 // @grant        none
 // @run-at       document-end
