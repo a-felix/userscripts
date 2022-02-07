@@ -154,8 +154,7 @@
 		formatMenu.id = "formatMenu";
 		
 		// "B", "I", "U", "N" buttons; "N" negates every other tag
-		// "I" is hidden because it doesn't work in the web chat
-		// however, mIRC does recognize italic text typed in the web chat
+		// unlike the web chat, mIRC does recognize italic text
 		// TODO: the status of "I" is subject to consideration, ask
 		formatMenu.appendChild(createFormatMenuLabel("Font style:", true));
 		formatMenu.appendChild(createFormatStyleButton(

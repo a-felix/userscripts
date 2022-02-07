@@ -12,8 +12,10 @@
 // ==/UserScript==
 
 (function() {
+	// function that waits; by default, it waits 1 second
 	function sleep(ms = 1000) { return new Promise(resolve => { window.setTimeout(resolve, ms) }) }
 	
+	// this function checks for the existence of the chat box every second
 	async function getTextBox() {
 		let firstLoop = true, result;
 		while (true) {
@@ -23,6 +25,7 @@
 		}
 	}
 	
+	// this adds a style element containing everything needed for this script
 	function addCustomCss() {
 		let ircStyle = getComputedStyle(document.querySelector(".lines"));
 		let bgColor = ircStyle.backgroundColor;
@@ -113,16 +116,15 @@
 }
 #formatItalicBtn {
 	font-style: italic;
-	display: none;
 }
 #formatUnderlineBtn {
 	text-decoration: underline;
 }
 .XcDef {
-	color: rgb(183, 183, 183);
+	color: ${fgColor};
 }
 .XbcDef {
-	background: rgba(0, 0, 0, 0);
+	background: ${bgColor};
 }
 `
 		let cuCss = document.createElement("style");
@@ -130,6 +132,7 @@
 		document.head.appendChild(cuCss);
 	}
 	
+	// this creates labels in my little formatting menu
 	function createFormatMenuLabel(text, inline) {
 		let label = document.createElement("div");
 		label.className = "formatLabel";
@@ -138,6 +141,7 @@
 		return label;
 	}
 	
+	// this is a template used for buttons that affect formatting in some way
 	function createFormatStyleButton(textBox, text, tooltip, id, delim = "", param = "", classes = []) {
 		let button = document.createElement("div");
 		button.classList.add("formatStyleBtn");
@@ -160,16 +164,24 @@
 		return button;
 	}
 	
+	// this creates the formatting menu; it appears when hovering over the F
 	function constructFormatMenu(textBox) {
 		let formatMenu = document.createElement("div");
 		formatMenu.id = "formatMenu";
 		
+		// "B", "I", "U", "N" buttons; "N" negates every other tag
+		// unlike the web chat, mIRC does recognize italic text
+		// TODO: the status of "I" is subject to consideration, ask
 		formatMenu.appendChild(createFormatMenuLabel("Font style:", true));
 		formatMenu.appendChild(createFormatStyleButton(textBox, "B", "bold", "formatBoldBtn", "\x02", "", []));
 		formatMenu.appendChild(createFormatStyleButton(textBox, "I?", "italic?", "formatItalicBtn", "\x1D", "", []));
 		formatMenu.appendChild(createFormatStyleButton(textBox, "U", "underline", "formatUnderlineBtn", "\x1F", "", []));
 		formatMenu.appendChild(createFormatStyleButton(textBox, "N", "normal", undefined, "\x0F", "", []));
 		
+		// I added tooltips because colors are confusing
+		// "dark" gray is darker in mIRC, but lighter in browsers
+		// the numbers help with readability
+		// 0 = color code is shown in white; 1 = color code is shown in black
 		let colors = [
 			["white", 1], ["black", 0], ["dark blue", 0], ["green", 0], ["red", 0], ["dark red", 0],
 			["purple", 0], ["orange", 1], ["yellow", 1], ["light green", 0], ["teal", 0], ["cyan", 1], ["blue", 0],
@@ -178,15 +190,18 @@
 		
 		formatMenu.appendChild(createFormatMenuLabel("Font color:", false));
 		
+		// dummy element because I don't want to redefine the colors
 		let dummyColourline = document.createElement("div");
 		dummyColourline.classList.add("colourline");
 		
+		// this is where the color buttons are actually created
 		colors.forEach((color, back) => {
 			let desc = color[0], fore = color[1];
 			if ((back != 0) && (back % 6 == 0)) dummyColourline.appendChild(document.createElement("br"));
 			dummyColourline.appendChild(createFormatStyleButton(textBox, String(back), desc, undefined, "\x03", String(back).padStart(2, "0"), ["Xc" + fore, "Xbc" + back]));
 		});
 		
+		// 2 extra buttons for default formatting + just the symbol
 		dummyColourline.appendChild(createFormatStyleButton(textBox, "99", "default", undefined, "\x03", "99", ["XcDef", "XbcDef"]));
 		dummyColourline.appendChild(createFormatStyleButton(textBox, "\x03", "end", undefined, "\x03", "", []));
 		
@@ -194,6 +209,7 @@
 		return formatMenu;
 	}
 	
+	// this adds the formatting menu to the DOM once the textbox is found
 	getTextBox().then(textBox => {
 		addCustomCss();
 		
