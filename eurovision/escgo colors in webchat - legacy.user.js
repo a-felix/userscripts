@@ -246,7 +246,7 @@
 		bgShow.addEventListener("click", function() { that.switch(2); });
 	}
 	
-	// this creates the formatting menu; it appears when hovering over the F
+	// this creates the formatting menu; it appears when hovering over the A
 	function constructFormatMenu(textBox) {
 		var picker = new advancedPicker(textBox);
 		var formatMenu = document.createElement("div");

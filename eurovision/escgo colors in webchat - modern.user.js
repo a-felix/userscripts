@@ -334,7 +334,7 @@
 		bgShow.addEventListener("click", function() { that.switch(2); });
 	}
 	
-	// this creates the formatting menu; it appears when hovering over the F
+	// this creates the formatting menu; it appears when hovering over the A
 	function constructFormatMenu(textBox) {
 		let picker = new advancedPicker(textBox);
 		let formatMenu = document.createElement("div");
