@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         escgo! colors in webchat - modern
-// @version      0.6
+// @version      0.7
 // @description  Adds an option to make text bold/italic?/underlined/colorful in the escgo! chat
 // @author       Andrei Felix
 // @match        http://www.escgo.com/wp-content/uploads/euwebirc-master/static/qui.html
@@ -380,7 +380,7 @@
 		
 		// 2 extra buttons for default formatting + just the symbol
 		dummyColourline.appendChild(createFormatStyleButton(textBox, "99", "default", undefined, "\x03", "99", ["XcDef", "XbcDef"], picker, true));
-		dummyColourline.appendChild(createFormatStyleButton(textBox, "\x03", "end", undefined, "\x03", "", [], picker, false));
+		dummyColourline.appendChild(createFormatStyleButton(textBox, "X", "reset/manual entry", undefined, "\x03", "", [], picker, false));
 		
 		formatMenu.appendChild(dummyColourline);
 		formatMenu.appendChild(picker.DOM);
