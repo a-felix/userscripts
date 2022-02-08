@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         escgo! colors in webchat - modern
-// @version      0.5
+// @version      0.6
 // @description  Adds an option to make text bold/italic?/underlined/colorful in the escgo! chat
 // @author       Andrei Felix
 // @match        http://www.escgo.com/wp-content/uploads/euwebirc-master/static/qui.html
@@ -83,7 +83,8 @@
 }
 #formatArea:focus #formatMenu,
 #formatArea:focus-within #formatMenu,
-#formatArea:hover #formatMenu {
+#formatArea:hover #formatMenu,
+#formatMenu.forceOpen {
 	display: block;
 }
 .formatLabel {
@@ -95,7 +96,7 @@
 .formatStyleBtn {
 	display: inline-block;
 	opacity: 0.9;
-	background-color: #ccc;
+	background-color: #cccccc;
 	color: black;
 	font-size: 95%;
 	text-align: center;
@@ -104,7 +105,7 @@
 	padding: 0.2em;
 	width: 1.2em;
 	height: 1.2em;
-	border: 1px #666 solid;
+	border: 1px #666666 solid;
 	user-select: none;
 	vertical-align: middle;
 	-webkit-user-select: none;
@@ -140,7 +141,7 @@
 	padding: 2px;
 	width: 8.87em;
 	height: 1.2em;
-	border: 1px #666 solid;
+	border: 1px #666666 solid;
 	margin-right: 0.3em;
 	margin-bottom: 0.1em;
 	text-align: center;
@@ -201,7 +202,7 @@
 	
 	// advanced color selection UI ("picker") activated by holding Shift
 	// this allows simultaneous entry of a foreground and a background color
-	function advancedPicker(textBox) {
+	function advancedPicker(textBox, formatMenu) {
 		let preview, okBtn, cancelBtn, fgShow, bgShow, that = this;
 		let defaultBoxClasses = "formatStyleBtn formatColorPicked";
 		
@@ -274,6 +275,7 @@
 			if (this.selection === null) {
 				this.DOM.style.display = "inline-block";
 				this.selection = 1;
+				formatMenu.classList.add("forceOpen");
 				fgShow.style.outlineStyle = "solid";
 				window.addEventListener("keyup", shiftUpFn);
 				window.addEventListener("blur", blurFn);
@@ -284,6 +286,7 @@
 		this.disable = function() {
 			this.DOM.style.display = "";
 			this.selection = this.fg = this.bg = null;
+			formatMenu.classList.remove("forceOpen");
 			fgShow.style.outlineStyle = "";
 			fgShow.className = defaultBoxClasses;
 			bgShow.style.outlineStyle = "";
@@ -336,10 +339,10 @@
 	
 	// this creates the formatting menu; it appears when hovering over the A
 	function constructFormatMenu(textBox) {
-		let picker = new advancedPicker(textBox);
 		let formatMenu = document.createElement("div");
 		formatMenu.id = "formatMenu";
 		formatMenu.className = "dropdownmenu";
+		let picker = new advancedPicker(textBox, formatMenu);
 		
 		// "B", "I", "U", "N" buttons; "N" negates every other tag
 		// unlike the web chat, mIRC does recognize italic text

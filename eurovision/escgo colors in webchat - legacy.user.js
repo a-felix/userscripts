@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         escgo! colors in webchat - legacy
-// @version      0.5
+// @version      0.6
 // @description  Adds an option to make text bold/italic?/underlined/colorful in the escgo! chat. I tried to keep it as ES5-friendly as possible.
 // @author       Andrei Felix
 // @match        http://www.escgo.com/wp-content/uploads/euwebirc-master/static/qui.html
@@ -42,10 +42,10 @@
 			"#formatMenu{display:none;position:absolute;top:auto;left:0;bottom:100%;padding:0.1em 0 0.1em 0.3em;" +
 			"border:1px " + bdColor + " solid;background-color:" + bgColor + ";white-space:nowrap;font-size:85%;text-align:left} " +
 			"#formatMenu .colourline{display:inline-block;white-space:nowrap} " +
-			"#formatArea:focus #formatMenu, #formatArea:focus-within #formatMenu, #formatArea:hover #formatMenu{display:block} " +
+			"#formatArea:focus #formatMenu, #formatArea:focus-within #formatMenu, #formatArea:hover #formatMenu,#formatMenu.forceOpen{display:block} " +
 			".formatLabel{color:" + fgColor + ";margin-right:0.1em;margin-bottom:0.1em;line-height:1} " +
-			".formatStyleBtn{display:inline-block;opacity:0.9;background-color:#ccc;color:black;font-size:95%;text-align:center;" +
-			"margin-right:0.3em;margin-bottom:0.1em;padding:0.2em;width:1.2em;height:1.2em;border:1px #666 solid;user-select:none;" +
+			".formatStyleBtn{display:inline-block;opacity:0.9;background-color:#cccccc;color:black;font-size:95%;text-align:center;" +
+			"margin-right:0.3em;margin-bottom:0.1em;padding:0.2em;width:1.2em;height:1.2em;border:1px #666666 solid;user-select:none;" +
 			"vertical-align:middle;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;cursor:default} " +
 			".formatStyleBtn:hover{opacity:1;outline:2px " + fgColor + " solid;outline-offset:-1px} " +
 			".formatStyleBtn:active{opacity:0.65} " +
@@ -54,7 +54,7 @@
 			"#formatItalicBtn{font-style:italic} " +
 			"#formatUnderlineBtn{text-decoration:underline} " +
 			"#formatMenu #formatColorAdvanced.colourline{display:none;padding-left:1.95em} " +
-			"#formatColorPreview{padding:2px;width:8.87em;height:1.2em;border:1px #666 solid;margin-right:0.3em;margin-bottom:0.1em;text-align:center} " +
+			"#formatColorPreview{padding:2px;width:8.87em;height:1.2em;border:1px #666666 solid;margin-right:0.3em;margin-bottom:0.1em;text-align:center} " +
 			".formatColorPicked{background:transparent} " +
 			"#formatColorFg.Xbc99{background:" + fgColor + "} " +
 			".XcDef, .Xc99{color:" + fgColor + "} " +
@@ -113,7 +113,7 @@
 	
 	// advanced color selection UI ("picker") activated by holding Shift
 	// this allows simultaneous entry of a foreground and a background color
-	function advancedPicker(textBox) {
+	function advancedPicker(textBox, formatMenu) {
 		var preview, okBtn, cancelBtn, fgShow, bgShow, that = this;
 		var defaultBoxClasses = "formatStyleBtn formatColorPicked";
 		
@@ -186,6 +186,7 @@
 			if (this.selection === null) {
 				this.DOM.style.display = "inline-block";
 				this.selection = 1;
+				formatMenu.className = "forceOpen";
 				fgShow.style.outlineStyle = "solid";
 				window.addEventListener("keyup", shiftUpFn);
 				window.addEventListener("blur", blurFn);
@@ -196,6 +197,7 @@
 		this.disable = function() {
 			this.DOM.style.display = "";
 			this.selection = this.fg = this.bg = null;
+			formatMenu.className = "";
 			fgShow.style.outlineStyle = "";
 			fgShow.className = defaultBoxClasses;
 			bgShow.style.outlineStyle = "";
@@ -248,10 +250,10 @@
 	
 	// this creates the formatting menu; it appears when hovering over the A
 	function constructFormatMenu(textBox) {
-		var picker = new advancedPicker(textBox);
 		var formatMenu = document.createElement("div");
 		formatMenu.id = "formatMenu";
 		formatMenu.className = "dropdownmenu";
+		var picker = new advancedPicker(textBox, formatMenu);
 		
 		// "B", "I", "U", "N" buttons; "N" negates every other tag
 		// unlike the web chat, mIRC does recognize italic text
