@@ -215,7 +215,7 @@
 		this.DOM = document.createElement("div");
 		this.DOM.id = "formatColorAdvanced";
 		this.DOM.className = "colourline";
-		this.DOM.appendChild(createFormatMenuLabel("Compound colors:", false));
+		this.DOM.appendChild(createFormatMenuLabel("Advanced:", false));
 		
 		okBtn = document.createElement("div");
 		okBtn.className = "formatStyleBtn";
