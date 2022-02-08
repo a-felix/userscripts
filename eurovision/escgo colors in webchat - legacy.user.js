@@ -8,7 +8,7 @@
 // @icon         http://www.escgo.com/wp-content/uploads/2017/04/cropped-escgologolarge-32x32.png
 // @grant        none
 // @run-at       document-end
-// downloadURL   https://github.com/a-felix/userscripts/raw/main/eurovision/escgo%20colors%20in%20webchat%20-%20legacy.user.js
+// @downloadURL   https://github.com/a-felix/userscripts/raw/main/eurovision/escgo%20colors%20in%20webchat%20-%20legacy.user.js
 // ==/UserScript==
 
 (function() {
