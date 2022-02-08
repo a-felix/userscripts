@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         escgo! colors in webchat
-// @version      0.4
+// @name         escgo! colors in webchat - legacy
+// @version      0.5
 // @description  Adds an option to make text bold/italic?/underlined/colorful in the escgo! chat. I tried to keep it as ES5-friendly as possible.
 // @author       Andrei Felix
 // @match        http://www.escgo.com/wp-content/uploads/euwebirc-master/static/qui.html
@@ -251,7 +251,7 @@
 		var picker = new advancedPicker(textBox);
 		var formatMenu = document.createElement("div");
 		formatMenu.id = "formatMenu";
-		formatMenu.class = "dropdownmenu";
+		formatMenu.className = "dropdownmenu";
 		
 		// "B", "I", "U", "N" buttons; "N" negates every other tag
 		// unlike the web chat, mIRC does recognize italic text
