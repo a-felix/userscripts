@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         escgo! colors in webchat - modern
-// @version      0.7.2
+// @version      0.7.3
 // @description  Adds an option to make text bold/italic?/underlined/colorful in the escgo! chat
 // @author       Andrei Felix
 // @match        http://www.escgo.com/wp-content/uploads/euwebirc-master/static/qui.html
@@ -151,7 +151,7 @@
 	outline: 2px ${fgColor} none;
 	outline-offset: -1px;
 }
-#formatColorFg.Xbc99 {
+#formatMenu #formatColorFg.Xbc99 {
 	background: ${fgColor};
 }
 #formatMenu .XcDef, #formatMenu .Xc99 {
