@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         escgo! colors in webchat - legacy
-// @version      0.7.1
+// @version      0.7.2
 // @description  Adds an option to make text bold/italic?/underlined/colorful in the escgo! chat. I tried to keep it as ES5-friendly as possible.
 // @author       Andrei Felix
 // @match        http://www.escgo.com/wp-content/uploads/euwebirc-master/static/qui.html
@@ -42,7 +42,7 @@
 			"#formatMenu{display:none;position:absolute;top:auto;left:0;bottom:100%;padding:0.1em 0 0.1em 0.3em;" +
 			"border:1px " + bdColor + " solid;background-color:" + bgColor + ";white-space:nowrap;font-size:85%;text-align:left} " +
 			"#formatMenu .colourline{display:inline-block;white-space:nowrap} " +
-			"#formatArea:focus #formatMenu, #formatArea:focus-within #formatMenu, #formatArea:hover #formatMenu,#formatMenu.forceOpen{display:block} " +
+			"#formatArea:focus #formatMenu,#formatArea:focus-within #formatMenu,#formatArea:hover #formatMenu,#formatMenu.forceOpen{display:block} " +
 			".formatLabel{color:" + fgColor + ";margin-right:0.1em;margin-bottom:0.1em;line-height:1} " +
 			".formatStyleBtn{display:inline-block;opacity:0.9;background-color:#cccccc;color:black;font-size:95%;text-align:center;" +
 			"margin-right:0.3em;margin-bottom:0.1em;padding:0.2em;width:1.2em;height:1.2em;border:1px #666666 solid;user-select:none;" +
@@ -57,8 +57,8 @@
 			"#formatColorPreview{padding:2px;width:8.87em;height:1.2em;border:1px #666666 solid;margin-right:0.3em;margin-bottom:0.1em;text-align:center} " +
 			".formatColorPicked{background:transparent;outline:2px" + fgColor + " none;outline-offset: -1px} " +
 			"#formatColorFg.Xbc99{background:" + fgColor + "} " +
-			".XcDef, .Xc99{color:" + fgColor + "} " +
-			".XbcDef, .Xbc99{background:transparent}";
+			"#formatMenu .XcDef,#formatMenu .Xc99{color:" + fgColor + "} " +
+			"#formatMenu .XbcDef,#formatMenu .Xbc99{background:transparent}";
 		var cuCss = document.createElement("style");
 		cuCss.innerHTML = customCss;
 		document.head.appendChild(cuCss);
