@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         escgo! colors in webchat - legacy
-// @version      0.3
+// @name         escgo! colors in webchat
+// @version      0.4
 // @description  Adds an option to make text bold/italic?/underlined/colorful in the escgo! chat. I tried to keep it as ES5-friendly as possible.
 // @author       Andrei Felix
 // @match        http://www.escgo.com/wp-content/uploads/euwebirc-master/static/qui.html
@@ -8,31 +8,19 @@
 // @icon         http://www.escgo.com/wp-content/uploads/2017/04/cropped-escgologolarge-32x32.png
 // @grant        none
 // @run-at       document-end
-// @downloadURL   https://github.com/a-felix/userscripts/raw/main/eurovision/escgo%20colors%20in%20webchat%20-%20legacy.user.js
+// @downloadURL  https://github.com/a-felix/userscripts/raw/main/eurovision/escgo%20colors%20in%20webchat%20-%20legacy.user.js
 // ==/UserScript==
 
 (function() {
 	// this function waits until it can find the box you type stuff in
-	// it also uses recursion to remember the last step it took, somehow
-	// I promise it makes sense
-	// couldn't risk using querySelector
-	function getTextBox(context, fn) {
-		if (context === null) context = document;
-		var nextClass, currClasses = "";
-		if (context === document) nextClass = "bottomboundpanel";
-		else {
-			currClasses = context.className.split(" ");
-			if (currClasses.indexOf("bottomboundpanel") != -1) nextClass = "input";
-			else if (currClasses.indexOf("input") != -1) nextClass = "keyboard-input";
-			else nextClass = null;
-		}
-		if (nextClass === null) return fn(context);
-		var result = context.getElementsByClassName(nextClass)[0];
+	// couldn't risk using querySelector, apparently it's a 2013 thing
+	function getTextBox(fn) {
+		var result = document.getElementsByClassName("keyboard-input")[0];
 		if (result === undefined) {
-			window.setTimeout(function() { getTextBox(context, fn); }, 1000);
+			window.setTimeout(function() { getTextBox(fn); }, 1000);
 			return;
 		}
-		return getTextBox(result, fn);
+		fn(result);
 	}
 	
 	// this adds a style element containing everything needed for this script
@@ -42,26 +30,35 @@
 		var ircStyle = getComputedStyle(document.getElementsByClassName("lines")[0]);
 		var bgColor = ircStyle.backgroundColor;
 		var fgColor = ircStyle.color;
-		var customCss =
-			".qwebirc-qui.bottomboundpanel form{padding-right:1.4em} " +
-			"#formatArea{position:absolute;width:1.2em;height:1.2em;right:0;top:0;bottom:0;margin:0;padding:0} " +
+		ircStyle = getComputedStyle(document.getElementsByClassName("bottomboundpanel")[0]);
+		var bdColor = ircStyle.borderTopColor;
+		ircStyle = getComputedStyle(document.getElementsByClassName("tab-selected")[0]);
+		var btnColor = ircStyle.backgroundColor;
+		var customCss = ".qwebirc-qui.bottomboundpanel form{padding-left:1.3em;padding-right:2px} " +
+			".qwebirc-qui .input input.keyboard-input{padding-left:2px} " +
+			"#formatArea{position:absolute;width:1.2em;height:1.2em;left:0;top:0;bottom:0;margin:0;padding:0} " +
 			"#formatBtn{position:relative;width:100%;height:100%;left:0;top:0;text-align:center;" +
-			"background-color:#666;font-weight:bold;font-style:italic;text-decoration:underline;color:orange} " +
-			"#formatMenu{display:none;background:#666;position:absolute;bottom:100%;right:0;" +
-			"padding:0.1em 0 0.1em 0.3em;border:1px #666 solid;white-space:nowrap;font-size:85%;text-align:left} " +
-			"#formatArea:focus #formatMenu,#formatArea:focus-within #formatMenu,#formatArea:hover #formatMenu{display:block} " +
-			".formatLabel{color:white;margin-right:0.1em;margin-bottom:0.1em;width:5.5em} " +
-			".formatStyleBtn{display:inline-block;opacity:0.9;background-color:#ccc;color:black;font-size:95%;" +
-			"text-align:center;margin-right:0.3em;margin-bottom:0.1em;padding:2px;width:1.2em;height:1.2em;" +
-			"border:1px #666 solid;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;cursor:default} " +
-			".formatStyleBtn:hover{opacity:1;outline:2px #eee solid;outline-offset:-1px} " +
+			"background-color:" + btnColor + ";font-weight:bold;font-style:italic;text-decoration:underline;color:cyan;cursor:default} " +
+			"#formatMenu{display:none;position:absolute;top:auto;left:0;bottom:100%;padding:0.1em 0 0.1em 0.3em;" +
+			"border:1px " + bdColor + " solid;background-color:" + bgColor + ";white-space:nowrap;font-size:85%;text-align:left} " +
+			"#formatMenu .colourline{display:inline-block;white-space:nowrap} " +
+			"#formatArea:focus #formatMenu, #formatArea:focus-within #formatMenu, #formatArea:hover #formatMenu{display:block} " +
+			".formatLabel{color:" + fgColor + ";margin-right:0.1em;margin-bottom:0.1em;line-height:1} " +
+			".formatStyleBtn{display:inline-block;opacity:0.9;background-color:#ccc;color:black;font-size:95%;text-align:center;" +
+			"margin-right:0.3em;margin-bottom:0.1em;padding:0.2em;width:1.2em;height:1.2em;border:1px #666 solid;user-select:none;" +
+			"vertical-align:middle;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;cursor:default} " +
+			".formatStyleBtn:hover{opacity:1;outline:2px " + fgColor + " solid;outline-offset:-1px} " +
 			".formatStyleBtn:active{opacity:0.65} " +
 			".colourline .formatStyleBtn{opacity:1} " +
 			"#formatBoldBtn{font-weight:bold} " +
 			"#formatItalicBtn{font-style:italic} " +
 			"#formatUnderlineBtn{text-decoration:underline} " +
-			".XcDef{color:" + fgColor + "} " +
-			".XbcDef{background:" + bgColor + "}";
+			"#formatMenu #formatColorAdvanced.colourline{display:none;padding-left:1.95em} " +
+			"#formatColorPreview{padding:2px;width:8.87em;height:1.2em;border:1px #666 solid;margin-right:0.3em;margin-bottom:0.1em;text-align:center} " +
+			".formatColorPicked{background:transparent} " +
+			"#formatColorFg.Xbc99{background:" + fgColor + "} " +
+			".XcDef, .Xc99{color:" + fgColor + "} " +
+			".XbcDef, .Xbc99{background:transparent}";
 		var cuCss = document.createElement("style");
 		cuCss.innerHTML = customCss;
 		document.head.appendChild(cuCss);
@@ -78,7 +75,7 @@
 	
 	// this is a template used for buttons that affect formatting in some way
 	// can't use classList
-	function createFormatStyleButton(textBox, text, tooltip, id, delim, param, classes) {
+	function createFormatStyleButton(textBox, text, tooltip, id, delim, param, classes, picker, pickerCompat) {
 		var button = document.createElement("div");
 		button.className = "formatStyleBtn";
 		classes.forEach(function(cl) { button.className += " " + cl; });
@@ -87,14 +84,18 @@
 		button.addEventListener("click", function (e) {
 			e.preventDefault();
 			e.stopPropagation();
-			var ss = textBox.selectionStart;
-			var se = textBox.selectionEnd;
-			var endTag = delim;
-			if (ss == se) endTag = "";
-			var currValue = textBox.value;
-			textBox.value = currValue.slice(0, ss) + delim + param + currValue.slice(ss, se) + endTag + currValue.slice(se);
-			textBox.selectionStart = textBox.selectionEnd = se + delim.length + param.length + endTag.length;
-			textBox.focus();
+			if (!pickerCompat || !e.shiftKey) { // buttons that are incompatible with the "picker" will cancel it
+				picker.disable();
+				var ss = textBox.selectionStart;
+				var se = textBox.selectionEnd;
+				var endTag = delim;
+				if (ss == se) endTag = "";
+				var currValue = textBox.value;
+				textBox.value = currValue.slice(0, ss) + delim + param + currValue.slice(ss, se) + endTag + currValue.slice(se);
+				textBox.selectionStart = textBox.selectionEnd = se + delim.length + param.length + endTag.length;
+				textBox.focus();
+			}
+			else if (e.shiftKey) picker.setColor(parseInt(param));
 		});
 		button.textContent = text;
 		return button;
@@ -110,19 +111,159 @@
 		return String(number);
 	}
 	
+	// advanced color selection UI ("picker") activated by holding Shift
+	// this allows simultaneous entry of a foreground and a background color
+	function advancedPicker(textBox) {
+		var preview, okBtn, cancelBtn, fgShow, bgShow, that = this;
+		var defaultBoxClasses = "formatStyleBtn formatColorPicked";
+		
+		// these properties describe the state of the "picker"
+		this.selection = null;
+		this.fg = null;
+		this.bg = null;
+		
+		// the following lines describe the UI for the "picker"
+		this.DOM = document.createElement("div");
+		this.DOM.id = "formatColorAdvanced";
+		this.DOM.className = "colourline";
+		this.DOM.appendChild(createFormatMenuLabel("Compound colors:", false));
+		
+		okBtn = document.createElement("div");
+		okBtn.className = "formatStyleBtn";
+		okBtn.textContent = "OK";
+		okBtn.style.width = "3.39em";
+		this.DOM.appendChild(okBtn);
+		
+		cancelBtn = document.createElement("div");
+		cancelBtn.className = "formatStyleBtn";
+		cancelBtn.textContent = "Cancel";
+		cancelBtn.style.width = "5em";
+		this.DOM.appendChild(cancelBtn);
+		
+		preview = document.createElement("div");
+		preview.id = "formatColorPreview";
+		preview.textContent = "Preview";
+		this.DOM.appendChild(preview);
+		
+		this.DOM.appendChild(createFormatMenuLabel("Fore:", true));
+		
+		fgShow = document.createElement("div");
+		fgShow.className = defaultBoxClasses;
+		fgShow.id = "formatColorFg";
+		this.DOM.appendChild(fgShow);
+		
+		this.DOM.appendChild(createFormatMenuLabel("Back:", true));
+		
+		bgShow = document.createElement("div");
+		bgShow.className = defaultBoxClasses;
+		this.DOM.appendChild(bgShow);
+		
+		// the "picker" submits when releasing Shift
+		// this is equivalent to clicking OK (while holding said Shift)
+		// the "picker" can be canceled by clicking Cancel (as seen further down below)
+		var shiftUpFn = function (e) {
+			if (!e || e.key === "Shift" || e.which === 16) {
+				var delim = "\x03";
+				var param = compatiblePad2(that.fg);
+				if (that.bg !== null) param += "," + compatiblePad2(that.bg);
+				var ss = textBox.selectionStart;
+				var se = textBox.selectionEnd;
+				var endTag = delim;
+				if (ss == se) endTag = "";
+				var currValue = textBox.value;
+				textBox.value = currValue.slice(0, ss) + delim + param + currValue.slice(ss, se) + endTag + currValue.slice(se);
+				textBox.selectionStart = textBox.selectionEnd = se + delim.length + param.length + endTag.length;
+				that.disable();
+				textBox.focus();
+			}
+		}
+		
+		// the "picker" is canceled if the window loses focus
+		var blurFn = function (e) { that.disable(); textBox.focus(); }
+		
+		// this initializes the "picker" if it's not initialized
+		this.enable = function() {
+			if (this.selection === null) {
+				this.DOM.style.display = "inline-block";
+				this.selection = 1;
+				fgShow.style.outlineStyle = "solid";
+				window.addEventListener("keyup", shiftUpFn);
+				window.addEventListener("blur", blurFn);
+			}
+		}
+		
+		// this restores the "picker" to its original state
+		this.disable = function() {
+			this.DOM.style.display = "";
+			this.selection = this.fg = this.bg = null;
+			fgShow.style.outlineStyle = "";
+			fgShow.className = defaultBoxClasses;
+			bgShow.style.outlineStyle = "";
+			bgShow.className = defaultBoxClasses;
+			preview.className = "";
+			window.removeEventListener("keyup", shiftUpFn);
+			window.removeEventListener("blur", blurFn);
+		}
+		
+		// normally, after choosing a foreground color,
+		// the "picker" expects a background color,
+		// but this allows users to set the focus back to the
+		// foreground color if needed
+		this.switch = function (boxIndex) {
+			if (boxIndex == 1) {
+				this.selection = 1;
+				fgShow.style.outlineStyle = "solid";
+				bgShow.style.outlineStyle = "";
+			}
+			else {
+				this.selection = 2;
+				fgShow.style.outlineStyle = "";
+				bgShow.style.outlineStyle = "solid";
+			}
+			textBox.focus();
+		}
+		
+		// this effectively registers a color selection
+		this.setColor = function (color) {
+			this.enable();
+			if (this.selection == 1) {
+				this.fg = color;
+				fgShow.className = defaultBoxClasses + " Xbc" + color;
+				this.switch(2);
+			}
+			else {
+				this.bg = color;
+				bgShow.className = defaultBoxClasses + " Xbc" + color;
+				this.switch(1);
+			}
+			preview.className = "Xc" + this.fg + " Xbc" + this.bg;
+		}
+		
+		// this makes the "picker" buttons work
+		okBtn.addEventListener("click", function() { shiftUpFn(); });
+		cancelBtn.addEventListener("click", function() { blurFn(); });
+		fgShow.addEventListener("click", function() { that.switch(1); });
+		bgShow.addEventListener("click", function() { that.switch(2); });
+	}
+	
 	// this creates the formatting menu; it appears when hovering over the F
 	function constructFormatMenu(textBox) {
+		var picker = new advancedPicker(textBox);
 		var formatMenu = document.createElement("div");
 		formatMenu.id = "formatMenu";
+		formatMenu.class = "dropdownmenu";
 		
 		// "B", "I", "U", "N" buttons; "N" negates every other tag
 		// unlike the web chat, mIRC does recognize italic text
 		// TODO: the status of "I" is subject to consideration, ask
-		formatMenu.appendChild(createFormatMenuLabel("Font style:", true));
-		formatMenu.appendChild(createFormatStyleButton(textBox, "B", "bold", "formatBoldBtn", "\x02", "", []));
-		formatMenu.appendChild(createFormatStyleButton(textBox, "I?", "italic?", "formatItalicBtn", "\x1D", "", []));
-		formatMenu.appendChild(createFormatStyleButton(textBox, "U", "underline", "formatUnderlineBtn", "\x1F", "", []));
-		formatMenu.appendChild(createFormatStyleButton(textBox, "N", "normal", undefined, "\x0F", "", []));
+		var fontStyleLabel = createFormatMenuLabel("Font style:", true);
+		fontStyleLabel.style.width = "5.75em";
+		formatMenu.appendChild(fontStyleLabel);
+		formatMenu.appendChild(createFormatStyleButton(textBox, "B", "bold", "formatBoldBtn", "\x02", "", [], picker, false));
+		formatMenu.appendChild(createFormatStyleButton(textBox, "I?", "italic?", "formatItalicBtn", "\x1D", "", [], picker, false));
+		formatMenu.appendChild(createFormatStyleButton(textBox, "U", "underline", "formatUnderlineBtn", "\x1F", "", [], picker, false));
+		formatMenu.appendChild(createFormatStyleButton(textBox, "N", "normal", undefined, "\x0F", "", [], picker, false));
+		formatMenu.appendChild(document.createElement("br"));
 		
 		// I added tooltips because colors are confusing
 		// "dark" gray is darker in mIRC, but lighter in browsers
@@ -148,29 +289,29 @@
 			["gray", 0]
 		];
 		
-		formatMenu.appendChild(createFormatMenuLabel("Font colour:", false));
-		
 		// dummy element because I don't want to redefine the colors
 		var dummyColourline = document.createElement("div");
 		dummyColourline.className = "colourline";
+		dummyColourline.appendChild(createFormatMenuLabel("Font colour:", false));
 		
 		// this is where the color buttons are actually created
 		colors.forEach(function (color, back) {
 			var desc = color[0], fore = color[1];
 			if ((back != 0) && (back % 6 == 0)) dummyColourline.appendChild(document.createElement("br"));
-			dummyColourline.appendChild(createFormatStyleButton(textBox, String(back), desc, undefined, "\x03", compatiblePad2(back), ["Xc" + fore, "Xbc" + back]));
+			dummyColourline.appendChild(createFormatStyleButton(textBox, String(back), desc, undefined, "\x03", compatiblePad2(back), ["Xc" + fore, "Xbc" + back], picker, true));
 		});
 		
 		// 2 extra buttons for default formatting + just the symbol
-		dummyColourline.appendChild(createFormatStyleButton(textBox, "99", "default", undefined, "\x03", "99", ["XcDef", "XbcDef"]));
-		dummyColourline.appendChild(createFormatStyleButton(textBox, "\x03", "end", undefined, "\x03", "", []));
+		dummyColourline.appendChild(createFormatStyleButton(textBox, "99", "default", undefined, "\x03", "99", ["XcDef", "XbcDef"], picker, true));
+		dummyColourline.appendChild(createFormatStyleButton(textBox, "\x03", "end", undefined, "\x03", "", [], picker, false));
 		
 		formatMenu.appendChild(dummyColourline);
+		formatMenu.appendChild(picker.DOM);
 		return formatMenu;
 	}
 	
 	// this adds the formatting menu to the DOM once the textbox is found
-	getTextBox(document, function(textBox) {
+	getTextBox(function(textBox) {
 		addCustomCss();
 		
 		var contForm = textBox.parentElement;
@@ -181,10 +322,11 @@
 		
 		var formatBtn = document.createElement("div");
 		formatBtn.id = "formatBtn";
-		formatBtn.textContent = "F";
+		formatBtn.textContent = "A";
 		
 		formatArea.appendChild(formatBtn);
 		formatArea.appendChild(constructFormatMenu(textBox));
-		contDiv.appendChild(formatArea);
+		
+		contDiv.insertBefore(formatArea, contForm);
 	});
 })();
