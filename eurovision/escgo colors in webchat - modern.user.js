@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         escgo! colors in webchat - modern
-// @version      0.7.3
+// @version      0.7.4
 // @description  Adds an option to make text bold/italic?/underlined/colorful in the escgo! chat
 // @author       Andrei Felix
 // @match        http://www.escgo.com/wp-content/uploads/euwebirc-master/static/qui.html
@@ -57,7 +57,7 @@
 	left: 0;
 	top: 0;
 	text-align: center;
-	background-color: ${btnColor};
+	background: ${btnColor};
 	font-weight: bold;
 	font-style: italic;
 	text-decoration: underline;
@@ -72,7 +72,7 @@
 	bottom: 100%;
 	padding: 0.1em 0 0.1em 0.3em;
 	border: 1px ${bdColor} solid;
-	background-color: ${bgColor};
+	background: ${bgColor};
 	white-space: nowrap;
 	font-size: 85%;
 	text-align: left;
@@ -96,7 +96,7 @@
 .formatStyleBtn {
 	display: inline-block;
 	opacity: 0.9;
-	background-color: #cccccc;
+	background: #cccccc;
 	color: black;
 	font-size: 95%;
 	text-align: center;
@@ -151,14 +151,22 @@
 	outline: 2px ${fgColor} none;
 	outline-offset: -1px;
 }
+#formatMenu .Xc99,
+#formatMenu .XcDef.XbcDef.invertDef {
+	color: ${fgColor};
+}
+#formatMenu .Xbc99 {
+	background: transparent;
+}
+#formatMenu .XcDef {
+	color: ${bgColor};
+}
+#formatMenu .XbcDef,
 #formatMenu #formatColorFg.Xbc99 {
 	background: ${fgColor};
 }
-#formatMenu .XcDef, #formatMenu .Xc99 {
-	color: ${fgColor};
-}
-#formatMenu .XbcDef, #formatMenu .Xbc99 {
-	background: transparent;
+#formatMenu .XcDef.XbcDef.invertDef{
+	background: ${bgColor};
 }
 `
 		let cuCss = document.createElement("style");
@@ -206,12 +214,13 @@
 	// this allows simultaneous entry of a foreground and a background color
 	function advancedPicker(textBox, formatMenu) {
 		let preview, okBtn, cancelBtn, fgShow, bgShow, that = this;
-		let defaultBoxClasses = "formatStyleBtn formatColorPicked";
+		let colorBoxClasses = "formatStyleBtn formatColorPicked";
 		
 		// these properties describe the state of the "picker"
 		this.selection = null;
 		this.fg = null;
 		this.bg = null;
+		this.btn99 = null;
 		
 		// the following lines describe the UI for the "picker"
 		this.DOM = document.createElement("div");
@@ -239,14 +248,14 @@
 		this.DOM.appendChild(createFormatMenuLabel("Fore:", true));
 		
 		fgShow = document.createElement("div");
-		fgShow.className = defaultBoxClasses;
+		fgShow.className = colorBoxClasses;
 		fgShow.id = "formatColorFg";
 		this.DOM.appendChild(fgShow);
 		
 		this.DOM.appendChild(createFormatMenuLabel("Back:", true));
 		
 		bgShow = document.createElement("div");
-		bgShow.className = defaultBoxClasses;
+		bgShow.className = colorBoxClasses;
 		this.DOM.appendChild(bgShow);
 		
 		// the "picker" submits when releasing Shift
@@ -272,6 +281,8 @@
 		// the "picker" is canceled if the window loses focus
 		let blurFn = function (e) { that.disable(); textBox.focus(); }
 		
+		this.set99 = function(button) { this.btn99 = button; }
+		
 		// this initializes the "picker" if it's not initialized
 		this.enable = function() {
 			if (this.selection === null) {
@@ -279,6 +290,7 @@
 				this.selection = 1;
 				formatMenu.classList.add("forceOpen");
 				fgShow.style.outlineStyle = "solid";
+				this.btn99.classList.remove("invertDef");
 				window.addEventListener("keyup", shiftUpFn);
 				window.addEventListener("blur", blurFn);
 			}
@@ -290,10 +302,11 @@
 			this.selection = this.fg = this.bg = null;
 			formatMenu.classList.remove("forceOpen");
 			fgShow.style.outlineStyle = "";
-			fgShow.className = defaultBoxClasses;
+			fgShow.className = colorBoxClasses;
 			bgShow.style.outlineStyle = "";
-			bgShow.className = defaultBoxClasses;
+			bgShow.className = colorBoxClasses;
 			preview.className = "";
+			this.btn99.classList.remove("invertDef");
 			window.removeEventListener("keyup", shiftUpFn);
 			window.removeEventListener("blur", blurFn);
 		}
@@ -307,11 +320,13 @@
 				this.selection = 1;
 				fgShow.style.outlineStyle = "solid";
 				bgShow.style.outlineStyle = "";
+				this.btn99.classList.remove("invertDef");
 			}
 			else {
 				this.selection = 2;
 				fgShow.style.outlineStyle = "";
 				bgShow.style.outlineStyle = "solid";
+				this.btn99.classList.add("invertDef");
 			}
 			textBox.focus();
 		}
@@ -321,12 +336,12 @@
 			this.enable();
 			if (this.selection == 1) {
 				this.fg = color;
-				fgShow.className = defaultBoxClasses + " Xbc" + color;
+				fgShow.className = colorBoxClasses + " Xbc" + color;
 				this.switch(2);
 			}
 			else {
 				this.bg = color;
-				bgShow.className = defaultBoxClasses + " Xbc" + color;
+				bgShow.className = colorBoxClasses + " Xbc" + color;
 				this.switch(1);
 			}
 			preview.className = "Xc" + this.fg + " Xbc" + this.bg;
@@ -381,7 +396,9 @@
 		});
 		
 		// 2 extra buttons for default formatting + just the symbol
-		dummyColourline.appendChild(createFormatStyleButton(textBox, "99", "default", undefined, "\x03", "99", ["XcDef", "XbcDef"], picker, true));
+		let defaultStyleBtn = createFormatStyleButton(textBox, "99", "default", undefined, "\x03", "99", ["XcDef", "XbcDef"], picker, true);
+		picker.set99(defaultStyleBtn);
+		dummyColourline.appendChild(defaultStyleBtn);
 		dummyColourline.appendChild(createFormatStyleButton(textBox, "X", "reset/manual entry", undefined, "\x03", "", [], picker, false));
 		
 		formatMenu.appendChild(dummyColourline);

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         escgo! colors in webchat - legacy
-// @version      0.7.3
+// @version      0.7.4
 // @description  Adds an option to make text bold/italic?/underlined/colorful in the escgo! chat. I tried to keep it as ES5-friendly as possible.
 // @author       Andrei Felix
 // @match        http://www.escgo.com/wp-content/uploads/euwebirc-master/static/qui.html
@@ -38,13 +38,13 @@
 			".qwebirc-qui .input input.keyboard-input{padding-left:2px} " +
 			"#formatArea{position:absolute;width:1.2em;height:1.2em;left:0;top:0;bottom:0;margin:0;padding:0} " +
 			"#formatBtn{position:relative;width:100%;height:100%;left:0;top:0;text-align:center;" +
-			"background-color:" + btnColor + ";font-weight:bold;font-style:italic;text-decoration:underline;color:cyan;cursor:default} " +
+			"background:" + btnColor + ";font-weight:bold;font-style:italic;text-decoration:underline;color:cyan;cursor:default} " +
 			"#formatMenu{display:none;position:absolute;top:auto;left:0;bottom:100%;padding:0.1em 0 0.1em 0.3em;" +
-			"border:1px " + bdColor + " solid;background-color:" + bgColor + ";white-space:nowrap;font-size:85%;text-align:left} " +
+			"border:1px " + bdColor + " solid;background:" + bgColor + ";white-space:nowrap;font-size:85%;text-align:left} " +
 			"#formatMenu .colourline{display:inline-block;white-space:nowrap} " +
 			"#formatArea:focus #formatMenu,#formatArea:focus-within #formatMenu,#formatArea:hover #formatMenu,#formatMenu.forceOpen{display:block} " +
 			".formatLabel{color:" + fgColor + ";margin-right:0.1em;margin-bottom:0.1em;line-height:1} " +
-			".formatStyleBtn{display:inline-block;opacity:0.9;background-color:#cccccc;color:black;font-size:95%;text-align:center;" +
+			".formatStyleBtn{display:inline-block;opacity:0.9;background:#cccccc;color:black;font-size:95%;text-align:center;" +
 			"margin-right:0.3em;margin-bottom:0.1em;padding:0.2em;width:1.2em;height:1.2em;border:1px #666666 solid;user-select:none;" +
 			"vertical-align:middle;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;cursor:default} " +
 			".formatStyleBtn:hover{opacity:1;outline:2px " + fgColor + " solid;outline-offset:-1px} " +
@@ -56,9 +56,11 @@
 			"#formatMenu #formatColorAdvanced.colourline{display:none;padding-left:1.95em} " +
 			"#formatColorPreview{padding:2px;width:8.87em;height:1.2em;border:1px #666666 solid;margin-right:0.3em;margin-bottom:0.1em;text-align:center} " +
 			".formatColorPicked{background:transparent;outline:2px" + fgColor + " none;outline-offset: -1px} " +
-			"#formatMenu #formatColorFg.Xbc99{background:" + fgColor + "} " +
-			"#formatMenu .XcDef,#formatMenu .Xc99{color:" + fgColor + "} " +
-			"#formatMenu .XbcDef,#formatMenu .Xbc99{background:transparent}";
+			"#formatMenu .Xc99,#formatMenu .XcDef.XbcDef.invertDef{color:" + fgColor + "} " +
+			"#formatMenu .Xbc99{background:transparent}" +
+			"#formatMenu .XcDef{color:" + bgColor + "} " +
+			"#formatMenu .XbcDef,#formatMenu #formatColorFg.Xbc99{background:" + fgColor + "} " +
+			"#formatMenu .XcDef.XbcDef.invertDef{background:" + bgColor + "}";
 		var cuCss = document.createElement("style");
 		cuCss.innerHTML = customCss;
 		document.head.appendChild(cuCss);
@@ -115,12 +117,14 @@
 	// this allows simultaneous entry of a foreground and a background color
 	function advancedPicker(textBox, formatMenu) {
 		var preview, okBtn, cancelBtn, fgShow, bgShow, that = this;
-		var defaultBoxClasses = "formatStyleBtn formatColorPicked";
+		var colorBoxClasses = "formatStyleBtn formatColorPicked";
+		var defaultColorClasses = "formatStyleBtn XcDef XbcDef";
 		
 		// these properties describe the state of the "picker"
 		this.selection = null;
 		this.fg = null;
 		this.bg = null;
+		this.btn99 = null;
 		
 		// the following lines describe the UI for the "picker"
 		this.DOM = document.createElement("div");
@@ -148,14 +152,14 @@
 		this.DOM.appendChild(createFormatMenuLabel("Fore:", true));
 		
 		fgShow = document.createElement("div");
-		fgShow.className = defaultBoxClasses;
+		fgShow.className = colorBoxClasses;
 		fgShow.id = "formatColorFg";
 		this.DOM.appendChild(fgShow);
 		
 		this.DOM.appendChild(createFormatMenuLabel("Back:", true));
 		
 		bgShow = document.createElement("div");
-		bgShow.className = defaultBoxClasses;
+		bgShow.className = colorBoxClasses;
 		this.DOM.appendChild(bgShow);
 		
 		// the "picker" submits when releasing Shift
@@ -181,6 +185,8 @@
 		// the "picker" is canceled if the window loses focus
 		var blurFn = function (e) { that.disable(); textBox.focus(); }
 		
+		this.set99 = function(button) { this.btn99 = button; }
+		
 		// this initializes the "picker" if it's not initialized
 		this.enable = function() {
 			if (this.selection === null) {
@@ -188,6 +194,7 @@
 				this.selection = 1;
 				formatMenu.className = "forceOpen";
 				fgShow.style.outlineStyle = "solid";
+				this.btn99.className = defaultColorClasses;
 				window.addEventListener("keyup", shiftUpFn);
 				window.addEventListener("blur", blurFn);
 			}
@@ -199,10 +206,11 @@
 			this.selection = this.fg = this.bg = null;
 			formatMenu.className = "";
 			fgShow.style.outlineStyle = "";
-			fgShow.className = defaultBoxClasses;
+			fgShow.className = colorBoxClasses;
 			bgShow.style.outlineStyle = "";
-			bgShow.className = defaultBoxClasses;
+			bgShow.className = colorBoxClasses;
 			preview.className = "";
+			this.btn99.className = defaultColorClasses;
 			window.removeEventListener("keyup", shiftUpFn);
 			window.removeEventListener("blur", blurFn);
 		}
@@ -216,11 +224,13 @@
 				this.selection = 1;
 				fgShow.style.outlineStyle = "solid";
 				bgShow.style.outlineStyle = "";
+				this.btn99.className = defaultColorClasses;
 			}
 			else {
 				this.selection = 2;
 				fgShow.style.outlineStyle = "";
 				bgShow.style.outlineStyle = "solid";
+				this.btn99.className = defaultColorClasses + " invertDef";
 			}
 			textBox.focus();
 		}
@@ -230,12 +240,12 @@
 			this.enable();
 			if (this.selection == 1) {
 				this.fg = color;
-				fgShow.className = defaultBoxClasses + " Xbc" + color;
+				fgShow.className = colorBoxClasses + " Xbc" + color;
 				this.switch(2);
 			}
 			else {
 				this.bg = color;
-				bgShow.className = defaultBoxClasses + " Xbc" + color;
+				bgShow.className = colorBoxClasses + " Xbc" + color;
 				this.switch(1);
 			}
 			preview.className = "Xc" + this.fg + " Xbc" + this.bg;
@@ -304,7 +314,9 @@
 		});
 		
 		// 2 extra buttons for default formatting + just the symbol
-		dummyColourline.appendChild(createFormatStyleButton(textBox, "99", "default", undefined, "\x03", "99", ["XcDef", "XbcDef"], picker, true));
+		var defaultStyleBtn = createFormatStyleButton(textBox, "99", "default", undefined, "\x03", "99", ["XcDef", "XbcDef"], picker, true);
+		picker.set99(defaultStyleBtn);
+		dummyColourline.appendChild(defaultStyleBtn);
 		dummyColourline.appendChild(createFormatStyleButton(textBox, "X", "reset/manual entry", undefined, "\x03", "", [], picker, false));
 		
 		formatMenu.appendChild(dummyColourline);
