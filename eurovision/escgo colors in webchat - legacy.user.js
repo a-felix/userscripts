@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         escgo! colors in webchat - legacy
-// @version      0.7.4
+// @version      0.7.5
 // @description  Adds an option to make text bold/italic?/underlined/colorful in the escgo! chat. I tried to keep it as ES5-friendly as possible.
 // @author       Andrei Felix
 // @match        http://www.escgo.com/wp-content/uploads/euwebirc-master/static/qui.html
@@ -55,7 +55,7 @@
 			"#formatUnderlineBtn{text-decoration:underline} " +
 			"#formatMenu #formatColorAdvanced.colourline{display:none;padding-left:1.95em} " +
 			"#formatColorPreview{padding:2px;width:8.87em;height:1.2em;border:1px #666666 solid;margin-right:0.3em;margin-bottom:0.1em;text-align:center} " +
-			".formatColorPicked{background:transparent;outline:2px" + fgColor + " none;outline-offset: -1px} " +
+			".formatColorPicked{background:transparent;outline:2px " + fgColor + " none;outline-offset: -1px} " +
 			"#formatMenu .Xc99,#formatMenu .XcDef.XbcDef.invertDef{color:" + fgColor + "} " +
 			"#formatMenu .Xbc99{background:transparent}" +
 			"#formatMenu .XcDef{color:" + bgColor + "} " +
@@ -317,7 +317,7 @@
 		var defaultStyleBtn = createFormatStyleButton(textBox, "99", "default", undefined, "\x03", "99", ["XcDef", "XbcDef"], picker, true);
 		picker.set99(defaultStyleBtn);
 		dummyColourline.appendChild(defaultStyleBtn);
-		dummyColourline.appendChild(createFormatStyleButton(textBox, "X", "reset/manual entry", undefined, "\x03", "", [], picker, false));
+		dummyColourline.appendChild(createFormatStyleButton(textBox, "\u2514", "reset/manual entry", undefined, "\x03", "", [], picker, false));
 		
 		formatMenu.appendChild(dummyColourline);
 		formatMenu.appendChild(picker.DOM);
